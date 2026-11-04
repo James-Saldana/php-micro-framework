@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Enums;
 
 /**
- * HTTP status code enumeration for standardized responses.
+ * HTTP status code enumeration.
  */
 enum HttpStatus: int
 {
@@ -33,7 +33,6 @@ enum HttpStatus: int
     case FOUND = 302;
     case SEE_OTHER = 303;
     case NOT_MODIFIED = 304;
-    case USE_PROXY = 305;
     case TEMPORARY_REDIRECT = 307;
     case PERMANENT_REDIRECT = 308;
 
@@ -56,7 +55,6 @@ enum HttpStatus: int
     case UNSUPPORTED_MEDIA_TYPE = 415;
     case RANGE_NOT_SATISFIABLE = 416;
     case EXPECTATION_FAILED = 417;
-    case IM_A_TEAPOT = 418;
     case MISDIRECTED_REQUEST = 421;
     case UNPROCESSABLE_ENTITY = 422;
     case LOCKED = 423;
@@ -66,7 +64,6 @@ enum HttpStatus: int
     case PRECONDITION_REQUIRED = 428;
     case TOO_MANY_REQUESTS = 429;
     case REQUEST_HEADER_FIELDS_TOO_LARGE = 431;
-    case UNAVAILABLE_FOR_LEGAL_REASONS = 451;
 
     // 5xx: Server errors
     case INTERNAL_SERVER_ERROR = 500;
@@ -75,11 +72,6 @@ enum HttpStatus: int
     case SERVICE_UNAVAILABLE = 503;
     case GATEWAY_TIMEOUT = 504;
     case HTTP_VERSION_NOT_SUPPORTED = 505;
-    case VARIANT_ALSO_NEGOTIATES = 506;
-    case INSUFFICIENT_STORAGE = 507;
-    case LOOP_DETECTED = 508;
-    case NOT_EXTENDED = 510;
-    case NETWORK_AUTHENTICATION_REQUIRED = 511;
 
     /**
      * Get the default reason phrase for this status code.
@@ -106,7 +98,6 @@ enum HttpStatus: int
             self::FOUND => 'Found',
             self::SEE_OTHER => 'See Other',
             self::NOT_MODIFIED => 'Not Modified',
-            self::USE_PROXY => 'Use Proxy',
             self::TEMPORARY_REDIRECT => 'Temporary Redirect',
             self::PERMANENT_REDIRECT => 'Permanent Redirect',
             self::BAD_REQUEST => 'Bad Request',
@@ -127,7 +118,6 @@ enum HttpStatus: int
             self::UNSUPPORTED_MEDIA_TYPE => 'Unsupported Media Type',
             self::RANGE_NOT_SATISFIABLE => 'Range Not Satisfiable',
             self::EXPECTATION_FAILED => 'Expectation Failed',
-            self::IM_A_TEAPOT => 'I\'m a teapot',
             self::MISDIRECTED_REQUEST => 'Misdirected Request',
             self::UNPROCESSABLE_ENTITY => 'Unprocessable Entity',
             self::LOCKED => 'Locked',
@@ -137,18 +127,12 @@ enum HttpStatus: int
             self::PRECONDITION_REQUIRED => 'Precondition Required',
             self::TOO_MANY_REQUESTS => 'Too Many Requests',
             self::REQUEST_HEADER_FIELDS_TOO_LARGE => 'Request Header Fields Too Large',
-            self::UNAVAILABLE_FOR_LEGAL_REASONS => 'Unavailable For Legal Reasons',
             self::INTERNAL_SERVER_ERROR => 'Internal Server Error',
             self::NOT_IMPLEMENTED => 'Not Implemented',
             self::BAD_GATEWAY => 'Bad Gateway',
             self::SERVICE_UNAVAILABLE => 'Service Unavailable',
             self::GATEWAY_TIMEOUT => 'Gateway Timeout',
             self::HTTP_VERSION_NOT_SUPPORTED => 'HTTP Version Not Supported',
-            self::VARIANT_ALSO_NEGOTIATES => 'Variant Also Negotiates',
-            self::INSUFFICIENT_STORAGE => 'Insufficient Storage',
-            self::LOOP_DETECTED => 'Loop Detected',
-            self::NOT_EXTENDED => 'Not Extended',
-            self::NETWORK_AUTHENTICATION_REQUIRED => 'Network Authentication Required',
         };
     }
 
@@ -205,5 +189,13 @@ enum HttpStatus: int
     public function isServerError(): bool
     {
         return $this->value >= 500 && $this->value < 600;
+    }
+
+    /**
+     * Check if this status indicates an error (4xx or 5xx).
+     */
+    public function isError(): bool
+    {
+        return $this->isClientError() || $this->isServerError();
     }
 }

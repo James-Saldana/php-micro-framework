@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Contracts\Http\Middleware\MiddlewareInterface;
 use App\Http\Request;
 use App\Http\Response;
 use Closure;
 
 /**
  * Onion-style middleware pipeline.
- *
- * This class manages the execution of middleware in an onion-style pattern,
- * where each middleware wraps the next one. The request flows through
- * the middleware stack, and the response flows back through the same stack.
  */
 final class MiddlewarePipeline
 {
@@ -22,8 +19,6 @@ final class MiddlewarePipeline
 
     /**
      * Add a middleware to the pipeline.
-     *
-     * @param MiddlewareInterface|callable $middleware The middleware to add
      */
     public function add(MiddlewareInterface|callable $middleware): self
     {
@@ -32,9 +27,7 @@ final class MiddlewarePipeline
     }
 
     /**
-     * Prepend a middleware to the pipeline (executed first).
-     *
-     * @param MiddlewareInterface|callable $middleware The middleware to prepend
+     * Prepend a middleware to the pipeline.
      */
     public function prepend(MiddlewareInterface|callable $middleware): self
     {
@@ -43,7 +36,7 @@ final class MiddlewarePipeline
     }
 
     /**
-     * Get all middleware in the pipeline.
+     * Get all middleware.
      *
      * @return array<MiddlewareInterface|callable>
      */
@@ -62,18 +55,12 @@ final class MiddlewarePipeline
     }
 
     /**
-     * Execute the middleware pipeline with the given request and handler.
-     *
-     * @param Request $request The incoming request
-     * @param Closure $handler The final handler to execute if no middleware short-circuits
-     * @return Response The response after processing through the pipeline
+     * Execute the middleware pipeline.
      */
     public function handle(Request $request, Closure $handler): Response
     {
-        // Build the pipeline from the inside out (onion style)
         $next = $handler;
 
-        // Iterate through middleware in reverse order
         foreach (array_reverse($this->middleware) as $middleware) {
             $next = $this->wrapMiddleware($middleware, $next);
         }
@@ -83,10 +70,6 @@ final class MiddlewarePipeline
 
     /**
      * Wrap a middleware around the next handler.
-     *
-     * @param MiddlewareInterface|callable $middleware The middleware to wrap
-     * @param callable $next The next handler in the pipeline
-     * @return callable The wrapped handler
      */
     private function wrapMiddleware(MiddlewareInterface|callable $middleware, callable $next): callable
     {
@@ -94,25 +77,20 @@ final class MiddlewarePipeline
             if ($middleware instanceof MiddlewareInterface) {
                 return $middleware->handle($request, $next);
             }
-
-            // Support for callable middleware (simple closure-style)
             return $middleware($request, $next);
         };
     }
 
     /**
-     * Create a pipeline with the given middleware and execute it.
+     * Create and run a pipeline with the given middleware.
      *
-     * @param array<MiddlewareInterface|callable> $middleware Array of middleware
-     * @param Request $request The incoming request
-     * @param Closure $handler The final handler
-     * @return Response The response
+     * @param array<MiddlewareInterface|callable> $middleware
+     * @param Request $request
+     * @param Closure $handler
+     * @return Response
      */
-    public static function run(
-        array $middleware,
-        Request $request,
-        Closure $handler
-    ): Response {
+    public static function run(array $middleware, Request $request, Closure $handler): Response
+    {
         $pipeline = new self();
         foreach ($middleware as $m) {
             $pipeline->add($m);

@@ -1,30 +1,31 @@
-# PHP Micro Framework
+# PHP Micro Framework Pro
 
-An extremely lightweight, high-performance PHP 8.2+ micro-framework built for simplicity and speed.
+A professional, lightweight, high-performance PHP 8.2+ micro-framework for building modern web applications and APIs.
 
 ## Features
 
-- **Ultra-lightweight**: Under 15 core files, no external dependencies
-- **Modern PHP 8.2+**: Strict types, readonly properties, enums
+- **Ultra-lightweight**: Under 20 core files, no external dependencies
+- **Modern PHP 8.2+**: Strict types, readonly properties, enums, interfaces
+- **Professional structure**: Clean architecture with contracts and implementations
 - **Fast routing**: Expressive routing with parameters, constraints, and groups
 - **Middleware pipeline**: Onion-style middleware support
-- **DI Container**: Lightweight dependency injection
-- **Error handling**: Centralized exception handling with JSON/HTML responses
+- **DI Container**: Lightweight dependency injection with PSR-11 style
+- **Error handling**: Centralized exception handling with custom handlers
 - **PSR-12 compliant**: Clean, readable code following modern standards
+- **Production-ready**: Built for real-world applications
 
 ## Requirements
 
 - PHP 8.2 or higher
-- Composer (optional, for autoloading)
+- Composer (optional, for autoloading and development tools)
 
 ## Installation
 
 ### Option 1: Clone the repository
 
 ```bash
-cd /path/to/your/project
-git clone https://github.com/your-username/php-micro-framework.git
-cd php-micro-framework
+git clone https://github.com/your-repo/php-micro-framework-pro.git
+cd php-micro-framework-pro
 composer install
 ```
 
@@ -37,26 +38,51 @@ composer install
 ## Directory Structure
 
 ```
-php-micro-framework/
+php-micro-framework-pro/
 ├── src/
-│   ├── Core/
-│   │   ├── App.php              # Main application class
-│   │   ├── Container.php        # Dependency injection container
-│   │   ├── ExceptionHandler.php # Centralized error handling
-│   │   └── Router.php           # HTTP router with route groups
-│   ├── Enums/
-│   │   ├── HttpMethod.php       # HTTP method enumeration
-│   │   └── HttpStatus.php       # HTTP status code enumeration
-│   └── Http/
+│   ├── Contracts/                    # Interfaces and contracts
+│   │   ├── Container/
+│   │   │   └── ContainerInterface.php
+│   │   └── Http/
+│   │       ├── Middleware/
+│   │       │   └── MiddlewareInterface.php
+│   │       ├── Request/
+│   │       │   └── RequestInterface.php
+│   │       └── Response/
+│   │           └── ResponseInterface.php
+│   ├── Core/                         # Core framework classes
+│   │   ├── Application.php           # Main application class
+│   │   ├── Container/
+│   │   │   └── Container.php         # DI Container
+│   │   └── Router/
+│   │       ├── Router.php            # HTTP Router
+│   │       └── Route.php             # Route data class
+│   ├── Enums/                        # Enumerations
+│   │   ├── HttpMethod.php
+│   │   └── HttpStatus.php
+│   ├── Exceptions/                   # Exception handling
+│   │   └── Handler.php
+│   └── Http/                          # HTTP classes
 │       ├── Middleware/
-│       │   ├── MiddlewareInterface.php  # Middleware interface
-│       │   └── MiddlewarePipeline.php   # Middleware pipeline
-│       ├── Request.php          # HTTP request representation
-│       └── Response.php         # HTTP response builder
-├── bootstrap.php               # Application bootstrap
+│       │   ├── MiddlewarePipeline.php
+│       │   ├── TrimStrings.php
+│       │   └── ConvertEmptyStringsToNull.php
+│       ├── Request.php
+│       └── Response.php
+├── bootstrap/
+│   └── app.php                       # Application bootstrap
+├── config/
+│   └── app.php                       # Configuration
 ├── public/
-│   └── index.php               # Public entry point
+│   ├── index.php                     # Public entry point
+│   └── .htaccess                     # Apache configuration
+├── tests/                           # Unit tests
+├── storage/                         # Storage (logs, cache, views)
+│   ├── cache/
+│   ├── logs/
+│   └── views/
 ├── composer.json
+├── phpunit.xml
 └── README.md
 ```
 
@@ -64,13 +90,13 @@ php-micro-framework/
 
 ### 1. Create your entry point
 
-Create a `public/index.php` file:
+The `public/index.php` file is already configured. Just add your routes:
 
 ```php
 <?php
-require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../bootstrap/app.php';
 
-$app = require __DIR__ . '/../bootstrap.php';
+$app = require __DIR__ . '/../bootstrap/app.php';
 
 // Define your routes
 $app->get('/', function (App\Http\Request $request) {
@@ -88,7 +114,6 @@ $app->run();
 ### 2. Configure your web server
 
 **Apache (using .htaccess):**
-
 ```apache
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -100,12 +125,11 @@ $app->run();
 ```
 
 **Nginx:**
-
 ```nginx
 server {
     listen 80;
     server_name your-domain.com;
-    root /path/to/php-micro-framework/public;
+    root /path/to/php-micro-framework-pro/public;
     index index.php;
 
     location / {
@@ -118,6 +142,12 @@ server {
         include fastcgi_params;
     }
 }
+```
+
+### 3. Run the development server
+
+```bash
+php -S localhost:8000 -t public
 ```
 
 ## Routing
@@ -192,7 +222,8 @@ $app->get('/users/{id}/posts/{postId}', function (App\Http\Request $request) {
 
 ```php
 $app->group('/api/v1', [
-    // Group-level middleware would go here
+    new App\Http\Middleware\TrimStrings(),
+    new App\Http\Middleware\ConvertEmptyStringsToNull(),
 ], function ($router) {
     $router->get('/users', function (App\Http\Request $request) {
         return App\Http\Response::json(['version' => 'v1', 'users' => []]);
@@ -219,7 +250,7 @@ $app->group('/api', function ($router) {
 
 ```php
 // Match specific methods
-$app->match([HttpMethod::GET, HttpMethod::POST], '/users', function () {
+$app->match([App\Enums\HttpMethod::GET, App\Enums\HttpMethod::POST], '/users', function () {
     return App\Http\Response::json(['message' => 'GET or POST']);
 });
 
@@ -232,7 +263,6 @@ $app->any('/wildcard', function () {
 ### Controller Routes
 
 ```php
-// Using controller class
 $app->get('/users', [UserController::class, 'index']);
 $app->post('/users', [UserController::class, 'store']);
 $app->get('/users/{id}', [UserController::class, 'show']);
@@ -261,10 +291,20 @@ class UserController
 
 ## Middleware
 
-### Creating Middleware
+### Built-in Middleware
 
 ```php
-use App\Http\Middleware\MiddlewareInterface;
+// Trim strings from request input
+$app->middleware(new App\Http\Middleware\TrimStrings());
+
+// Convert empty strings to null
+$app->middleware(new App\Http\Middleware\ConvertEmptyStringsToNull());
+```
+
+### Creating Custom Middleware
+
+```php
+use App\Contracts\Http\Middleware\MiddlewareInterface;
 use App\Http\Request;
 use App\Http\Response;
 
@@ -273,7 +313,7 @@ class AuthMiddleware implements MiddlewareInterface
     public function handle(Request $request, callable $next): Response
     {
         // Before request handling
-        if (!$request->getHeader('Authorization')) {
+        if (!$this->isAuthenticated($request)) {
             return App\Http\Response::unauthorized('Unauthorized');
         }
 
@@ -283,25 +323,28 @@ class AuthMiddleware implements MiddlewareInterface
         // After request handling
         return $response->withHeader('X-Auth', 'true');
     }
+
+    private function isAuthenticated(Request $request): bool
+    {
+        return $request->getHeader('Authorization') !== null;
+    }
 }
 
-// Simple closure middleware
-$authMiddleware = function (Request $request, callable $next): Response {
-    if (!$request->getHeader('Authorization')) {
-        return App\Http\Response::unauthorized('Unauthorized');
-    }
-    return $next($request);
-};
+// Register middleware
+$app->middleware(new AuthMiddleware());
+
+// Or use closure middleware
+$app->middleware(function (Request $request, callable $next): Response {
+    // Before
+    $response = $next($request);
+    // After
+    return $response;
+});
 ```
 
-### Using Middleware
+### Route-Specific Middleware
 
 ```php
-// Global middleware (runs on every request)
-$app->middleware(new AuthMiddleware());
-$app->middleware($authMiddleware);
-
-// Route-specific middleware
 $app->get('/admin', function () {
     return App\Http\Response::json(['admin' => true]);
 }, [new AuthMiddleware()]);
@@ -310,44 +353,6 @@ $app->get('/admin', function () {
 $app->get('/secure', function () {
     return App\Http\Response::json(['secure' => true]);
 }, [new AuthMiddleware(), new RateLimitMiddleware()]);
-
-// Group middleware
-$app->group('/admin', [new AuthMiddleware()], function ($router) {
-    $router->get('/dashboard', fn() => App\Http\Response::json(['page' => 'dashboard']));
-    $router->get('/settings', fn() => App\Http\Response::json(['page' => 'settings']));
-});
-```
-
-### Built-in Response Helpers
-
-```php
-// JSON responses
-return App\Http\Response::json(['data' => $data]);
-return App\Http\Response::json(['error' => 'Not found'], 404);
-
-// HTML responses
-return App\Http\Response::html('<h1>Hello</h1>');
-return App\Http\Response::html('<p>Error</p>', 500);
-
-// Text responses
-return App\Http\Response::text('Hello World');
-
-// Redirect responses
-return App\Http\Response::redirect('/login');
-return App\Http\Response::redirect('/dashboard', 301);
-
-// Empty responses
-return App\Http\Response::empty();
-return App\Http\Response::noContent();
-
-// Status responses
-return App\Http\Response::ok();
-return App\Http\Response::created();
-return App\Http\Response::badRequest();
-return App\Http\Response::unauthorized();
-return App\Http\Response::forbidden();
-return App\Http\Response::notFound();
-return App\Http\Response::serverError();
 ```
 
 ## Dependency Injection
@@ -377,7 +382,7 @@ $app->transient(
     UserService::class
 );
 
-// Bind an interface to an implementation
+// Bind interface to implementation
 $app->bind(
     UserRepositoryInterface::class,
     UserRepository::class
@@ -414,7 +419,7 @@ $app->container()->call([$userService, 'createUser'], [
 $app->get('/users/{id}', function (
     App\Http\Request $request,
     UserRepository $repository
-) use ($app) {
+) {
     $id = $request->getAttribute('id');
     $user = $repository->find($id);
     return App\Http\Response::json($user);
@@ -468,12 +473,32 @@ $app->exceptionHandler()->default(function (\Throwable $e, App\Http\Request $req
 ### Environment Configuration
 
 ```php
-// Set environment (affects error detail level)
-$app->environment('production'); // or 'development', 'testing'
+// Set environment
+$app->environment('production'); // or 'development', 'staging', 'testing'
 
 // Enable/disable debug mode
 $app->debug(true); // Shows detailed errors in development
 $app->debug(false); // Hides sensitive info in production
+```
+
+### Logging Exceptions
+
+```php
+$app->exceptionHandler()->logHandler(function (\Throwable $e, App\Http\Request $request) {
+    // Log to file
+    file_put_contents(
+        __DIR__ . '/../storage/logs/exceptions.log',
+        sprintf(
+            "[%s] %s: %s in %s:%d\n",
+            date('Y-m-d H:i:s'),
+            get_class($e),
+            $e->getMessage(),
+            $e->getFile(),
+            $e->getLine()
+        ),
+        FILE_APPEND
+    );
+});
 ```
 
 ## Request Handling
@@ -529,86 +554,86 @@ $app->get('/demo', function (App\Http\Request $request) {
 });
 ```
 
+## Response Helpers
+
+### JSON Responses
+
+```php
+return App\Http\Response::json(['data' => $data]);
+return App\Http\Response::json(['error' => 'Not found'], 404);
+```
+
+### HTML Responses
+
+```php
+return App\Http\Response::html('<h1>Hello</h1>');
+return App\Http\Response::html('<p>Error</p>', 500);
+```
+
+### Text Responses
+
+```php
+return App\Http\Response::text('Hello World');
+```
+
+### Redirect Responses
+
+```php
+return App\Http\Response::redirect('/login');
+return App\Http\Response::redirect('/dashboard', 301);
+```
+
+### Empty Responses
+
+```php
+return App\Http\Response::empty();
+return App\Http\Response::noContent();
+```
+
+### Status Responses
+
+```php
+return App\Http\Response::ok();
+return App\Http\Response::created();
+return App\Http\Response::badRequest();
+return App\Http\Response::unauthorized();
+return App\Http\Response::forbidden();
+return App\Http\Response::notFound();
+return App\Http\Response::serverError();
+return App\Http\Response::serviceUnavailable();
+```
+
 ## Configuration
 
-### Bootstrap Configuration
+### Application Configuration
 
-Create a `config.php` file:
+Create a `config/app.php` file:
 
 ```php
 <?php
 
 return [
-    'app' => [
-        'name' => 'My Application',
-        'env' => getenv('APP_ENV') ?: 'development',
-        'debug' => (bool) getenv('APP_DEBUG'),
-        'url' => getenv('APP_URL') ?: 'http://localhost',
-    ],
-    'database' => [
-        'driver' => getenv('DB_DRIVER') ?: 'mysql',
-        'host' => getenv('DB_HOST') ?: 'localhost',
-        'database' => getenv('DB_DATABASE') ?: 'myapp',
-        'username' => getenv('DB_USERNAME') ?: 'root',
-        'password' => getenv('DB_PASSWORD') ?: '',
-    ],
+    'env' => getenv('APP_ENV') ?: 'development',
+    'debug' => (bool) (getenv('APP_DEBUG') ?: true),
+    'url' => getenv('APP_URL') ?: 'http://localhost',
+    'timezone' => getenv('APP_TIMEZONE') ?: 'UTC',
+    'locale' => getenv('APP_LOCALE') ?: 'en',
+    'key' => getenv('APP_KEY') ?: null,
 ];
 ```
 
-Load configuration in bootstrap:
+### Loading Configuration
 
 ```php
-$config = require __DIR__ . '/config.php';
+$config = require __DIR__ . '/config/app.php';
 
-$app = new App\Core\App();
-$app->environment($config['app']['env']);
-$app->debug($config['app']['debug']);
-
-// Register database service
-$app->singleton(
-    Database::class,
-    function () use ($config) {
-        return new Database(
-            $config['database']['driver'],
-            $config['database']['host'],
-            $config['database']['database'],
-            $config['database']['username'],
-            $config['database']['password']
-        );
-    }
-);
+$app->environment($config['env']);
+$app->debug($config['debug']);
 ```
 
 ## Best Practices
 
-### 1. Keep it Simple
-
-The framework is designed to be minimal. Don't add complexity unless necessary.
-
-### 2. Use Route Groups
-
-Group related routes together for better organization:
-
-```php
-$app->group('/api/v1', function ($router) {
-    $router->group('/users', function ($router) {
-        $router->get('/', [UserController::class, 'index']);
-        $router->post('/', [UserController::class, 'store']);
-        $router->get('/{id}', [UserController::class, 'show']);
-        $router->put('/{id}', [UserController::class, 'update']);
-        $router->delete('/{id}', [UserController::class, 'destroy']);
-    });
-});
-```
-
-### 3. Use Middleware Wisely
-
-Apply middleware at the appropriate level:
-- Global middleware for cross-cutting concerns (logging, CORS)
-- Group middleware for area-specific concerns (authentication)
-- Route middleware for specific requirements
-
-### 4. Keep Controllers Thin
+### 1. Keep Controllers Thin
 
 Move business logic to services:
 
@@ -639,7 +664,13 @@ class UserService
 }
 ```
 
-### 5. Handle Errors Gracefully
+### 2. Use Middleware Wisely
+
+- Global middleware for cross-cutting concerns (logging, CORS, request sanitization)
+- Group middleware for area-specific concerns (authentication, authorization)
+- Route middleware for specific requirements (rate limiting, feature flags)
+
+### 3. Handle Errors Gracefully
 
 Always provide meaningful error responses:
 
@@ -653,6 +684,35 @@ $app->handle(
         ], 422);
     }
 );
+```
+
+### 4. Use Route Groups
+
+Group related routes together:
+
+```php
+$app->group('/api/v1', function ($router) {
+    $router->group('/users', function ($router) {
+        $router->get('/', [UserController::class, 'index']);
+        $router->post('/', [UserController::class, 'store']);
+        $router->get('/{id}', [UserController::class, 'show']);
+        $router->put('/{id}', [UserController::class, 'update']);
+        $router->delete('/{id}', [UserController::class, 'destroy']);
+    });
+});
+```
+
+### 5. Keep Routes RESTful
+
+Follow REST conventions:
+
+```php
+// GET    /users          -> List all users
+// POST   /users          -> Create a user
+// GET    /users/{id}     -> Get a user
+// PUT    /users/{id}     -> Replace a user
+// PATCH  /users/{id}     -> Update a user
+// DELETE /users/{id}     -> Delete a user
 ```
 
 ## Performance Tips
@@ -669,48 +729,45 @@ $app->handle(
 
 ## Testing
 
-### Unit Testing
+### Running Tests
+
+```bash
+# Install PHPUnit
+composer install
+
+# Run all tests
+./vendor/bin/phpunit
+
+# Run with coverage
+./vendor/bin/phpunit --coverage-html coverage
+
+# Run specific test suite
+./vendor/bin/phpunit tests/Core
+```
+
+### Example Test
 
 ```php
-use PHPUnit\Framework\TestCase;
+use App\Core\Application;
 use App\Http\Request;
 use App\Http\Response;
+use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase
 {
     public function testGetRoute()
     {
-        $router = new \App\Core\Router();
-        $router->get('/test', fn() => Response::ok());
+        $app = new Application();
+        
+        $app->get('/test', function () {
+            return Response::ok('Success');
+        });
 
         $request = new Request('GET', '/test');
-        $container = new \App\Core\Container();
-
-        $response = $router->dispatch($request, $container);
-
-        $this->assertEquals(200, $response->getStatusCode());
-    }
-}
-```
-
-### Integration Testing
-
-```php
-use PHPUnit\Framework\TestCase;
-
-class AppTest extends TestCase
-{
-    public function testHomeRoute()
-    {
-        $app = new \App\Core\App();
-        
-        $app->get('/', fn() => Response::html('<h1>Home</h1>'));
-
-        $request = new Request('GET', '/');
         $response = $app->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertStringContainsString('Home', $response->getBody());
+        $this->assertEquals('Success', $response->getBody());
     }
 }
 ```
@@ -721,7 +778,11 @@ This framework is open-sourced software licensed under the [MIT license](LICENSE
 
 ## Contributing
 
-Contributions are welcome! Please follow PSR-12 coding standards and include tests for new features.
+Contributions are welcome! Please follow:
+- PSR-12 coding standards
+- Include tests for new features
+- Keep the framework lightweight
+- Document new features
 
 ## Support
 

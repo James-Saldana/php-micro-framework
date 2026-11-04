@@ -5,37 +5,30 @@ declare(strict_types=1);
 /**
  * Public entry point for the application.
  *
- * This is the only file that should be accessible from the web server.
  * All requests are routed through this file.
  */
 
-// Load the bootstrap file
-require_once __DIR__ . '/../bootstrap.php';
+// Load the application
+require_once __DIR__ . '/../bootstrap/app.php';
 
 // Get the application instance
-$app = require __DIR__ . '/../bootstrap.php';
+$app = require __DIR__ . '/../bootstrap/app.php';
 
-// Define routes
+// Define your routes here
 // ============================================================================
 
-// Basic GET route
+// Example: Basic route
 $app->get('/', function (App\Http\Request $request) {
-    return App\Http\Response::html('<h1>Welcome to PHP Micro Framework</h1>');
+    return App\Http\Response::html('<h1>Welcome to PHP Micro Framework Pro</h1>');
 });
 
-// Route with parameter
+// Example: Route with parameter
 $app->get('/hello/{name}', function (App\Http\Request $request) {
     $name = $request->getAttribute('name', 'World');
     return App\Http\Response::html("<h1>Hello, {$name}!</h1>");
 });
 
-// Route with optional parameter
-$app->get('/greet/{name?}', function (App\Http\Request $request) {
-    $name = $request->getAttribute('name', 'Guest');
-    return App\Http\Response::json(['message' => "Hello, {$name}!"]);
-});
-
-// JSON API route
+// Example: JSON API route
 $app->get('/api/users/{id}', function (App\Http\Request $request) {
     $id = $request->getAttribute('id');
     return App\Http\Response::json([
@@ -45,7 +38,7 @@ $app->get('/api/users/{id}', function (App\Http\Request $request) {
     ]);
 });
 
-// POST route
+// Example: POST route
 $app->post('/api/users', function (App\Http\Request $request) {
     $data = $request->getParsedBody();
     return App\Http\Response::json([
@@ -54,36 +47,21 @@ $app->post('/api/users', function (App\Http\Request $request) {
     ], 201);
 });
 
-// PUT route
-$app->put('/api/users/{id}', function (App\Http\Request $request) {
-    $id = $request->getAttribute('id');
-    $data = $request->getParsedBody();
-    return App\Http\Response::json([
-        'message' => "User {$id} updated",
-        'data' => $data,
-    ]);
-});
-
-// DELETE route
-$app->delete('/api/users/{id}', function (App\Http\Request $request) {
-    $id = $request->getAttribute('id');
-    return App\Http\Response::json(['message' => "User {$id} deleted"]);
-});
-
-// Route group with prefix and middleware
+// Example: Route group with middleware
 $app->group('/api/admin', [
-    // Middleware would go here
+    // Add your middleware here
+    // new App\Http\Middleware\AuthMiddleware(),
 ], function ($router) {
     $router->get('/dashboard', function (App\Http\Request $request) {
         return App\Http\Response::json(['page' => 'admin-dashboard']);
     });
-
+    
     $router->get('/settings', function (App\Http\Request $request) {
         return App\Http\Response::json(['page' => 'admin-settings']);
     });
 });
 
-// 404 handler (catch-all)
+// Example: 404 handler
 $app->any('/{path?}', function (App\Http\Request $request) {
     return App\Http\Response::notFound('Page not found');
 });

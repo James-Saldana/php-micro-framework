@@ -1,6 +1,6 @@
 {
     "name": "php-micro-framework/framework",
-    "description": "Extremely lightweight and modern PHP 8.2+ micro-framework",
+    "description": "Professional lightweight PHP 8.2+ micro-framework for building modern web applications",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -9,11 +9,13 @@
         "micro-framework",
         "router",
         "middleware",
-        "lightweight"
+        "lightweight",
+        "psr-12",
+        "modern"
     ],
     "authors": [
         {
-            "name": "PHP Micro Framework",
+            "name": "PHP Micro Framework Team",
             "email": ""
         }
     ],
@@ -23,7 +25,8 @@
     "require-dev": {
         "phpunit/phpunit": "^10.0",
         "phpstan/phpstan": "^1.10",
-        "squizlabs/php_codesniffer": "^3.7"
+        "squizlabs/php_codesniffer": "^3.7",
+        "phpmd/phpmd": "^2.10"
     },
     "autoload": {
         "psr-4": {
@@ -37,13 +40,16 @@
     },
     "scripts": {
         "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage",
         "analyse": "phpstan analyse src --level=8",
         "cs-check": "phpcs src --standard=PSR12",
-        "cs-fix": "phpcbf src --standard=PSR12"
+        "cs-fix": "phpcbf src --standard=PSR12",
+        "mess-detect": "phpmd src text phpmd.xml"
     },
     "config": {
         "optimize-autoloader": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "preferred-install": "dist"
     },
     "minimum-stability": "stable"
 }
