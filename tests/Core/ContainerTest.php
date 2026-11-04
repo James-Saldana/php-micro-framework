@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Core;
 
-use App\Core\Container;
+use App\Core\Container\Container;
 use PHPUnit\Framework\TestCase;
 
 /**

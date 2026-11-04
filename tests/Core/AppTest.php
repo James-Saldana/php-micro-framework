@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Core;
 
-use App\Core\App;
-use App\Core\Container;
+use App\Core\Application;
+use App\Core\Container\Container;
 use App\Http\Request;
 use App\Http\Response;
 use PHPUnit\Framework\TestCase;
@@ -15,17 +15,17 @@ use PHPUnit\Framework\TestCase;
  */
 class AppTest extends TestCase
 {
-    private App $app;
+    private Application $app;
 
     protected function setUp(): void
     {
-        $this->app = new App();
+        $this->app = new Application();
     }
 
     public function testRouter(): void
     {
         $router = $this->app->router();
-        $this->assertInstanceOf(\App\Core\Router::class, $router);
+        $this->assertInstanceOf(\App\Core\Router\Router::class, $router);
     }
 
     public function testContainer(): void
@@ -37,7 +37,7 @@ class AppTest extends TestCase
     public function testExceptionHandler(): void
     {
         $handler = $this->app->exceptionHandler();
-        $this->assertInstanceOf(\App\Core\ExceptionHandler::class, $handler);
+        $this->assertInstanceOf(\App\Exceptions\Handler::class, $handler);
     }
 
     public function testEnvironment(): void
@@ -72,7 +72,7 @@ class AppTest extends TestCase
 
         // We can't directly test the middleware stack, but we can verify
         // that the app accepts middleware registration
-        $this->assertInstanceOf(App::class, $this->app);
+        $this->assertInstanceOf(Application::class, $this->app);
     }
 
     public function testBind(): void
@@ -386,7 +386,7 @@ class AppTest extends TestCase
         restore_error_handler();
         restore_exception_handler();
 
-        $this->assertInstanceOf(App::class, $this->app);
+        $this->assertInstanceOf(Application::class, $this->app);
     }
 
     public function testIsBootedInitiallyFalse(): void

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Core;
 
-use App\Core\Container;
-use App\Core\Router;
+use App\Core\Container\Container;
+use App\Core\Router\Router;
 use App\Enums\HttpMethod;
 use App\Http\Request;
 use App\Http\Response;

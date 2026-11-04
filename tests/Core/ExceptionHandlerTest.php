@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Core;
 
-use App\Core\ExceptionHandler;
+use App\Exceptions\Handler;
 use App\Enums\HttpStatus;
 use App\Http\Request;
 use App\Http\Response;
@@ -15,22 +15,22 @@ use PHPUnit\Framework\TestCase;
  */
 class ExceptionHandlerTest extends TestCase
 {
-    private ExceptionHandler $handler;
+    private Handler $handler;
 
     protected function setUp(): void
     {
-        $this->handler = new ExceptionHandler();
+        $this->handler = new Handler();
     }
 
     public function testDevelopmentEnvironment(): void
     {
-        $this->handler->setEnvironment(ExceptionHandler::ENV_DEVELOPMENT);
+        $this->handler->setEnvironment(Handler::ENV_DEVELOPMENT);
         $this->assertTrue($this->handler->isDebug());
     }
 
     public function testProductionEnvironment(): void
     {
-        $this->handler->setEnvironment(ExceptionHandler::ENV_PRODUCTION);
+        $this->handler->setEnvironment(Handler::ENV_PRODUCTION);
         $this->assertFalse($this->handler->isDebug());
     }
 
@@ -240,7 +240,7 @@ class ExceptionHandlerTest extends TestCase
 
     public function testProductionErrorMessage(): void
     {
-        $this->handler->setEnvironment(ExceptionHandler::ENV_PRODUCTION);
+        $this->handler->setEnvironment(Handler::ENV_PRODUCTION);
 
         $request = new Request('GET', '/test');
         $exception = new \InvalidArgumentException('Sensitive error message');
@@ -253,7 +253,7 @@ class ExceptionHandlerTest extends TestCase
 
     public function testDevelopmentErrorMessage(): void
     {
-        $this->handler->setEnvironment(ExceptionHandler::ENV_DEVELOPMENT);
+        $this->handler->setEnvironment(Handler::ENV_DEVELOPMENT);
 
         $request = new Request('GET', '/test');
         $exception = new \InvalidArgumentException('Development error message');
@@ -266,7 +266,7 @@ class ExceptionHandlerTest extends TestCase
 
     public function testJsonResponseIncludesDebugInfo(): void
     {
-        $this->handler->setEnvironment(ExceptionHandler::ENV_DEVELOPMENT);
+        $this->handler->setEnvironment(Handler::ENV_DEVELOPMENT);
 
         $request = new Request('GET', '/test', '', [], ['Accept' => 'application/json']);
         $exception = new \RuntimeException('Test error');
@@ -283,7 +283,7 @@ class ExceptionHandlerTest extends TestCase
 
     public function testHtmlResponseIncludesDebugInfo(): void
     {
-        $this->handler->setEnvironment(ExceptionHandler::ENV_DEVELOPMENT);
+        $this->handler->setEnvironment(Handler::ENV_DEVELOPMENT);
 
         $request = new Request('GET', '/test');
         $exception = new \RuntimeException('Test error');

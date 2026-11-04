@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Http\Middleware;
 
-use App\Http\Middleware\MiddlewareInterface;
+use App\Contracts\Http\Middleware\MiddlewareInterface;
 use App\Http\Middleware\MiddlewarePipeline;
 use App\Http\Request;
 use App\Http\Response;

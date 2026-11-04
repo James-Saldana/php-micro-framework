@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Contracts\Http\Middleware\MiddlewareInterface;
 use App\Core\Container\Container;
 use App\Core\Router\Router;
 use App\Exceptions\Handler as ExceptionHandler;
