@@ -1,0 +1,27 @@
+# Apache configuration for PHP Micro Framework
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Redirect all requests to index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Deny access to sensitive files
+<FilesMatch "\.(env|log|sql|md|json|lock|yml|yaml|xml|ini|conf|config)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# PHP settings
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 12M
+    php_value max_execution_time 60
+    php_value memory_limit 128M
+    php_flag display_errors Off
+    php_flag log_errors On
+</IfModule>
