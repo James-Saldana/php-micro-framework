@@ -240,7 +240,7 @@ final class Router
         // Remove duplicate slashes
         $path = preg_replace('#/+#', '/', $path);
         // Remove trailing slash (except for root)
-        if ($path !== '/' && ends_with($path, '/')) {
+        if ($path !== '/' && str_ends_with($path, '/')) {
             $path = substr($path, 0, -1);
         }
         // Ensure starts with /
@@ -345,53 +345,23 @@ final class Router
      */
     private function compileRoutePattern(string $path): string
     {
-        // Escape special regex characters except for braces
+        // First, replace parameter patterns with placeholders to avoid preg_quote escaping issues
+        $path = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_]*)\?\}/', '{__OPTIONAL_$1__}', $path);
+        $path = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', '{__REQUIRED_$1__}', $path);
+        
+        // Now escape the entire path
         $pattern = preg_quote($path, '#');
-
-        // Replace {param} with named capture groups
-        $pattern = preg_replace_callback(
-            '/\\\{([a-zA-Z_][a-zA-Z0-9_]*)\\\}/',
-            function ($matches) {
-                $param = $matches[1];
-                return "(?P<{$param}>[^/]+)";
-            },
-            $pattern
-        );
-
-        // Replace {param?} with optional named capture groups
-        $pattern = preg_replace_callback(
-            '/\\\{([a-zA-Z_][a-zA-Z0-9_]*)\\\?\\\}/',
-            function ($matches) {
-                $param = $matches[1];
-                return "(?P<{$param}>[^/]*)?";
-            },
-            $pattern
-        );
-
-        // Replace {param:constraint} with constrained capture groups
-        $pattern = preg_replace_callback(
-            '/\\\{([a-zA-Z_][a-zA-Z0-9_]*):([^}]+)\\}\\?/',
-            function ($matches) {
-                $param = $matches[1];
-                $constraint = $matches[2];
-                return "(?P<{$param}>{$constraint})?";
-            },
-            $pattern
-        );
-
-        $pattern = preg_replace_callback(
-            '/\\\{([a-zA-Z_][a-zA-Z0-9_]*):([^}]+)\\\}/',
-            function ($matches) {
-                $param = $matches[1];
-                $constraint = $matches[2];
-                return "(?P<{$param}>{$constraint})";
-            },
-            $pattern
-        );
-
+        
+        // Replace placeholders with regex patterns
+        $pattern = str_replace('{__REQUIRED_', '(?P<', $pattern);
+        $pattern = str_replace('__}', '>[^/]+)', $pattern);
+        
+        // Optional parameter: {__OPTIONAL_name__} -> (?P<name>[^/]*)?
+        $pattern = str_replace('{__OPTIONAL_', '(?P<', $pattern);
+        $pattern = str_replace('__}', '>[^/]*)?', $pattern);
+        
         return '#^' . $pattern . '$#';
     }
-
     /**
      * Extract route parameters from the path.
      *
